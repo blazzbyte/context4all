@@ -28,28 +28,23 @@ export class Context4AllMCP extends PaidMcpAgent<Env, State, AgentProps> {
 		tools.addTool(this);
 		tools.calculateTool(this);
 
-		// Example of a free tool that checks for active subscriptions and the status of the logged in user's Stripe customer ID
-		tools.checkPaymentHistoryTool(this, {
-			BASE_URL: this.env.BASE_URL,
-			STRIPE_SECRET_KEY: this.env.STRIPE_SECRET_KEY
-		});
-
 		// Example of a paid tool that requires a logged in user and a one-time payment
 		tools.onetimeAddTool(this, {
 			STRIPE_ONE_TIME_PRICE_ID: this.env.STRIPE_ONE_TIME_PRICE_ID,
 			BASE_URL: this.env.BASE_URL
 		});
-
-		// Example of a paid tool that requires a logged in user and a subscription
-		tools.subscriptionTool(this, {
-			STRIPE_SUBSCRIPTION_PRICE_ID: this.env.STRIPE_SUBSCRIPTION_PRICE_ID,
-			BASE_URL: this.env.BASE_URL
-		});
-
-		// Example of a paid tool that requires a logged in user and a subscription with metered usage
-		tools.meteredAddTool(this, {
-			STRIPE_METERED_PRICE_ID: this.env.STRIPE_METERED_PRICE_ID,
-			BASE_URL: this.env.BASE_URL
+		
+		// Add the crawl_single_page tool with all required API keys
+		tools.crawlSinglePageTool(this, {
+			SUPABASE_URL: this.env.SUPABASE_URL,
+			SUPABASE_SERVICE_KEY: this.env.SUPABASE_SERVICE_KEY,
+			BROWSERLESS_TOKEN: this.env.BROWSERLESS_TOKEN,
+			BROWSERLESS_URL: this.env.BROWSERLESS_URL,
+			COHERE_API_KEY: this.env.COHERE_API_KEY,
+			USE_AGENTIC_RAG: this.env.USE_AGENTIC_RAG,
+			LLM_API_KEY: this.env.LLM_API_KEY,
+			LLM_API_URL: this.env.LLM_API_URL,
+			MODEL_CHOICE: this.env.MODEL_CHOICE
 		});
 	}
 }
