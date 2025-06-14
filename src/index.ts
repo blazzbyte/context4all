@@ -44,7 +44,9 @@ export class Context4AllMCP extends PaidMcpAgent<Env, State, AgentProps> {
 			USE_AGENTIC_RAG: this.env.USE_AGENTIC_RAG,
 			LLM_API_KEY: this.env.LLM_API_KEY,
 			LLM_API_URL: this.env.LLM_API_URL,
-			MODEL_CHOICE: this.env.MODEL_CHOICE
+			MODEL_CHOICE: this.env.MODEL_CHOICE,
+			MODEL_EMBEDDING: this.env.MODEL_EMBEDDING,
+			USE_CONTEXTUAL_EMBEDDINGS: this.env.USE_CONTEXTUAL_EMBEDDINGS
 		});
 	}
 }

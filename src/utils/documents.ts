@@ -108,7 +108,8 @@ export async function addDocumentsToSupabase(
         
         // Extract source_id from URL
         const parsedUrl = new URL(batchUrls[j]);
-        const sourceId = parsedUrl.hostname || parsedUrl.pathname;
+        // Remove "www." prefix to match the logic in metadata.ts
+        const sourceId = (parsedUrl.hostname || parsedUrl.pathname).replace(/^www\./, '');
         
         // Prepare data for insertion
         const data = {

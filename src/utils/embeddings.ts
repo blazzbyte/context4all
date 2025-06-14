@@ -11,7 +11,7 @@ import OpenAI from 'openai';
 export async function createEmbeddingsBatch(
   texts: string[],
   openaiClient: OpenAI,
-  modelEmbedding: string = "text-embedding-3-small"
+  modelEmbedding: string = "baai/bge-m3"
 ): Promise<number[][]> {
   if (!texts || texts.length === 0) {
     return [];
@@ -19,17 +19,18 @@ export async function createEmbeddingsBatch(
 
   if (!openaiClient) {
     console.log("No OpenAI client provided for embeddings, returning zero embeddings");
-    return texts.map(() => new Array(1536).fill(0));
+    return texts.map(() => new Array(1024).fill(0));
   }
   
-  const maxRetries = 3;
+  const maxRetries = 1;
   let retryDelay = 1000; // Start with 1 second delay (in milliseconds)
   
   for (let retry = 0; retry < maxRetries; retry++) {
     try {
       const response = await openaiClient.embeddings.create({
         model: modelEmbedding, // Use the provided model name
-        input: texts
+        input: texts,
+        dimensions: 1024
       });
       
       return response.data.map(item => item.embedding);
@@ -56,8 +57,8 @@ export async function createEmbeddingsBatch(
             successfulCount++;
           } catch (individualError) {
             console.log(`Failed to create embedding for text ${i}: ${individualError}`);
-            // Add zero embedding as fallback (assuming 1536 dimensions for text-embedding-3-small)
-            embeddings.push(new Array(1536).fill(0));
+            // Add zero embedding as fallback (assuming 1024 dimensions for baai/bge-m3)
+            embeddings.push(new Array(1024).fill(0));
           }
         }
         
@@ -81,15 +82,15 @@ export async function createEmbeddingsBatch(
 export async function createEmbedding(
   text: string,
   openaiClient: OpenAI,
-  modelEmbedding: string = "text-embedding-3-small"
+  modelEmbedding: string = "baai/bge-m3"
 ): Promise<number[]> {
   try {
     const embeddings = await createEmbeddingsBatch([text], openaiClient, modelEmbedding);
-    return embeddings[0] || new Array(1536).fill(0);
+    return embeddings[0] || new Array(1024).fill(0);
   } catch (e) {
     console.log(`Error creating embedding: ${e}`);
-    // Return empty embedding if there's an error (assuming 1536 dimensions)
-    return new Array(1536).fill(0);
+    // Return empty embedding if there's an error (assuming 1024 dimensions)
+    return new Array(1024).fill(0);
   }
 }
 

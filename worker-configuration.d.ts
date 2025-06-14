@@ -9,26 +9,33 @@ declare namespace Cloudflare {
 		GOOGLE_CLIENT_ID: string;
 		GOOGLE_CLIENT_SECRET: string;
 		HOSTED_DOMAIN: string;
-		COOKIE_ENCRYPTION_KEY: string;
+
 		STRIPE_PUBLISHABLE_KEY: string;
 		STRIPE_SECRET_KEY: string;
 		STRIPE_WEBHOOK_SECRET: string;
 		STRIPE_ONE_TIME_PRICE_ID: string;
 		STRIPE_SUBSCRIPTION_PRICE_ID: string;
 		STRIPE_METERED_PRICE_ID: string;
+
+        COOKIE_ENCRYPTION_KEY: string;
 		BASE_URL: string;
 		MCP_OBJECT: DurableObjectNamespace<import("./src/index").Context4AllMCP>;
-		SUPABASE_URL: string;
+		
+        SUPABASE_URL: string;
 		SUPABASE_SERVICE_KEY: string;
+
 		COHERE_API_KEY: string;
+
 		BROWSERLESS_TOKEN: string;
 		BROWSERLESS_URL: string;
+
 		USE_AGENTIC_RAG: string;
+		USE_CONTEXTUAL_EMBEDDINGS: string;
+
 		LLM_API_KEY: string;
 		LLM_API_URL: string;
 		MODEL_CHOICE: string;
 		MODEL_EMBEDDING: string;
-		USE_CONTEXTUAL_EMBEDDINGS: string;
 	}
 }
 interface Env extends Cloudflare.Env {}
