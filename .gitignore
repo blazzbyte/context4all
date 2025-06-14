@@ -1,0 +1,15 @@
+node_modules
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+
+# logs
+logs
+
+# cursor
+.cursor
+
+# docs
+docs
