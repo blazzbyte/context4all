@@ -48,6 +48,21 @@ export class Context4AllMCP extends PaidMcpAgent<Env, State, AgentProps> {
 			MODEL_EMBEDDING: this.env.MODEL_EMBEDDING,
 			USE_CONTEXTUAL_EMBEDDINGS: this.env.USE_CONTEXTUAL_EMBEDDINGS
 		});
+
+		// Add the smart_crawl_url tool with all required API keys
+		tools.smartCrawlUrlTool(this, {
+			SUPABASE_URL: this.env.SUPABASE_URL,
+			SUPABASE_SERVICE_KEY: this.env.SUPABASE_SERVICE_KEY,
+			BROWSERLESS_TOKEN: this.env.BROWSERLESS_TOKEN,
+			BROWSERLESS_URL: this.env.BROWSERLESS_URL,
+			COHERE_API_KEY: this.env.COHERE_API_KEY,
+			USE_AGENTIC_RAG: this.env.USE_AGENTIC_RAG,
+			LLM_API_KEY: this.env.LLM_API_KEY,
+			LLM_API_URL: this.env.LLM_API_URL,
+			MODEL_CHOICE: this.env.MODEL_CHOICE,
+			MODEL_EMBEDDING: this.env.MODEL_EMBEDDING,
+			USE_CONTEXTUAL_EMBEDDINGS: this.env.USE_CONTEXTUAL_EMBEDDINGS
+		});
 	}
 }
 

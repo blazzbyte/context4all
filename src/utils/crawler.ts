@@ -437,4 +437,161 @@ export class WebCrawler {
     
     return result;
   }
+
+  /**
+   * Crawl a markdown or text file
+   * 
+   * @param url URL of the file to crawl
+   * @returns Array with URL and markdown content
+   */
+  async crawlMarkdownFile(url: string): Promise<Array<{url: string, markdown: string}>> {
+    try {
+      const result = await this.crawl(url);
+      
+      if (result.success && result.markdown) {
+        return [{ url: url, markdown: result.markdown }];
+      } else {
+        console.log(`Failed to crawl ${url}: ${result.error}`);
+        return [];
+      }
+    } catch (error) {
+      console.log(`Error crawling markdown file ${url}: ${(error as Error).message}`);
+      return [];
+    }
+  }
+
+  /**
+   * Batch crawl multiple URLs in parallel
+   * 
+   * @param urls List of URLs to crawl
+   * @param maxConcurrent Maximum number of concurrent requests
+   * @returns Array of objects with URL and markdown content
+   */
+  async crawlBatch(urls: string[], maxConcurrent: number = 10): Promise<Array<{url: string, markdown: string}>> {
+    const results: Array<{url: string, markdown: string}> = [];
+    
+    // Process URLs in batches to control concurrency
+    for (let i = 0; i < urls.length; i += maxConcurrent) {
+      const batch = urls.slice(i, i + maxConcurrent);
+      
+      // Create promises for the current batch
+      const batchPromises = batch.map(async (url) => {
+        try {
+          const result = await this.crawl(url);
+          if (result.success && result.markdown) {
+            return { url: result.url, markdown: result.markdown };
+          }
+          return null;
+        } catch (error) {
+          console.log(`Error crawling ${url}: ${(error as Error).message}`);
+          return null;
+        }
+      });
+      
+      // Wait for all promises in the current batch to complete
+      const batchResults = await Promise.all(batchPromises);
+      
+      // Add successful results to the main results array
+      batchResults.forEach(result => {
+        if (result) {
+          results.push(result);
+        }
+      });
+      
+      // Add a small delay between batches to avoid overwhelming the server
+      if (i + maxConcurrent < urls.length) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+    
+    return results;
+  }
+
+  /**
+   * Normalize URL by removing fragment
+   * 
+   * @param url URL to normalize
+   * @returns Normalized URL
+   */
+  private normalizeUrl(url: string): string {
+    try {
+      const urlObj = new URL(url);
+      // Remove fragment (hash)
+      urlObj.hash = '';
+      return urlObj.toString();
+    } catch (error) {
+      return url;
+    }
+  }
+
+  /**
+   * Recursively crawl internal links from start URLs up to a maximum depth
+   * 
+   * @param startUrls List of starting URLs
+   * @param maxDepth Maximum recursion depth
+   * @param maxConcurrent Maximum number of concurrent requests
+   * @returns Array of objects with URL and markdown content
+   */
+  async crawlRecursiveInternalLinks(
+    startUrls: string[], 
+    maxDepth: number = 3, 
+    maxConcurrent: number = 10
+  ): Promise<Array<{url: string, markdown: string}>> {
+    const visited = new Set<string>();
+    const resultsAll: Array<{url: string, markdown: string}> = [];
+    
+    // Normalize starting URLs
+    let currentUrls = new Set(startUrls.map(url => this.normalizeUrl(url)));
+    
+    for (let depth = 0; depth < maxDepth; depth++) {
+      // Filter out already visited URLs
+      const urlsToCrawl = Array.from(currentUrls).filter(url => !visited.has(this.normalizeUrl(url)));
+      
+      if (urlsToCrawl.length === 0) {
+        break;
+      }
+      
+      console.log(`Crawling depth ${depth + 1}/${maxDepth}: ${urlsToCrawl.length} URLs`);
+      
+      // Crawl current level URLs in batches
+      const results = await this.crawlBatch(urlsToCrawl, maxConcurrent);
+      const nextLevelUrls = new Set<string>();
+      
+      for (const result of results) {
+        const normUrl = this.normalizeUrl(result.url);
+        visited.add(normUrl);
+        
+        if (result.markdown) {
+          resultsAll.push({ url: result.url, markdown: result.markdown });
+          
+          // Extract internal links for next level
+          try {
+            const crawlResult = await this.crawl(result.url);
+            if (crawlResult.success) {
+              crawlResult.links
+                .filter(link => link.internal)
+                .forEach(link => {
+                  const nextUrl = this.normalizeUrl(link.url);
+                  if (!visited.has(nextUrl)) {
+                    nextLevelUrls.add(nextUrl);
+                  }
+                });
+            }
+          } catch (error) {
+            console.log(`Error extracting links from ${result.url}: ${(error as Error).message}`);
+          }
+        }
+      }
+      
+      currentUrls = nextLevelUrls;
+      
+      // Add delay between depth levels
+      if (depth < maxDepth - 1 && currentUrls.size > 0) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
+    
+    console.log(`Recursive crawl completed. Total pages crawled: ${resultsAll.length}`);
+    return resultsAll;
+  }
 }

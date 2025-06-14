@@ -27,6 +27,12 @@ export function isTextFile(url: string): boolean {
 export async function parseSitemap(url: string): Promise<string[]> {
   try {
     const response = await fetch(url);
+    
+    if (!response.ok) {
+      console.error(`Failed to fetch sitemap: ${response.status} ${response.statusText}`);
+      return [];
+    }
+    
     const xml = await response.text();
     
     // Simple XML parsing for sitemap URLs
