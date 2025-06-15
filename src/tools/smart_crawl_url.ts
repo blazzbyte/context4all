@@ -56,8 +56,8 @@ This tool automatically detects the URL type and applies the appropriate crawlin
 All crawled content is chunked and stored in Supabase for later retrieval and querying.`,
     {
       url: z.string().url().describe("URL to crawl (can be a regular webpage, sitemap.xml, or .txt file)"),
-      max_depth: z.number().min(1).max(10).optional().default(3).describe("Maximum recursion depth for regular URLs (default: 3)"),
-      max_concurrent: z.number().min(1).max(20).optional().default(10).describe("Maximum number of concurrent browser sessions (default: 10)"),
+      max_depth: z.number().min(1).max(5).optional().default(3).describe("Maximum recursion depth for regular URLs (default: 3)"),
+      max_concurrent: z.number().min(1).max(10).optional().default(2).describe("Maximum number of concurrent browser sessions (default: 10)"),
       chunk_size: z.number().min(500).max(10000).optional().default(5000).describe("Maximum size of each content chunk in characters (default: 5000)")
     },
     async ({ url, max_depth = 3, max_concurrent = 10, chunk_size = 5000 }: {

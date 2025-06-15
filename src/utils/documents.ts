@@ -343,7 +343,8 @@ export async function addCodeExamplesToSupabase(
 
     for (let retry = 0; retry < maxRetries; retry++) {
       try {
-        await client.from('code_examples').insert(batchData);
+        const response = await client.from('code_examples').insert(batchData);
+        console.log(response);
         // Success - break out of retry loop
         break;
       } catch (e) {
