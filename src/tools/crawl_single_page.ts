@@ -3,9 +3,9 @@ import { experimental_PaidMcpAgent as PaidMcpAgent } from "@stripe/agent-toolkit
 import { WebCrawler } from "../utils/crawler";
 import { getSupabaseClient } from "../utils/supabase";
 import { extractSourceMetadata, updateSourceInfo, extractSourceSummary } from '../utils/metadata';
-import { addDocumentsToSupabase } from '../utils/documents';
+import { addDocumentsToSupabase, addCodeExamplesToSupabase } from '../utils/documents';
 import { smartChunkMarkdown, extractSectionInfo } from '../utils/content_processor';
-import { extractCodeBlocks, addCodeExamplesToSupabase, processCodeExample } from "../utils/code";
+import { extractCodeBlocks, processCodeExample } from "../utils/code";
 import OpenAI from "openai";
 
 // Define LinkInfo interface to match the one in crawler.ts

@@ -284,7 +284,8 @@ export async function addCodeExamplesToSupabase(
 
       // Extract source_id from URL
       const parsedUrl = new URL(urls[idx]);
-      const sourceId = parsedUrl.hostname || parsedUrl.pathname;
+      // Remove "www." prefix to match the logic in addDocumentsToSupabase
+      const sourceId = (parsedUrl.hostname || parsedUrl.pathname).replace(/^www\./, '');
 
       batchData.push({
         url: urls[idx],
@@ -303,8 +304,7 @@ export async function addCodeExamplesToSupabase(
 
     for (let retry = 0; retry < maxRetries; retry++) {
       try {
-        const result = await client.from('code_examples').insert(batchData);
-        console.log(result);
+        await client.from('code_examples').insert(batchData);
         // Success - break out of retry loop
         break;
       } catch (e) {
