@@ -247,7 +247,6 @@ All crawled content is chunked and stored in Supabase for later retrieval and qu
 
         // Extract and process code examples from all documents only if enabled
         const extractCodeExamplesEnabled = env.USE_AGENTIC_RAG === "true";
-        console.log(extractCodeExamplesEnabled);
         let allCodeBlocks: ReturnType<typeof extractCodeBlocks> = [];
         
         if (extractCodeExamplesEnabled && openaiClient) {
