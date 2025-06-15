@@ -36,7 +36,11 @@ export class Context4AllMCP extends PaidMcpAgent<Env, State, AgentProps> {
 			LLM_API_URL: this.env.LLM_API_URL,
 			MODEL_CHOICE: this.env.MODEL_CHOICE,
 			MODEL_EMBEDDING: this.env.MODEL_EMBEDDING,
-			USE_CONTEXTUAL_EMBEDDINGS: this.env.USE_CONTEXTUAL_EMBEDDINGS
+			USE_CONTEXTUAL_EMBEDDINGS: this.env.USE_CONTEXTUAL_EMBEDDINGS,
+
+			LANGSMITH_API_KEY: this.env.LANGSMITH_API_KEY,
+			LANGSMITH_ENDPOINT: this.env.LANGSMITH_ENDPOINT,
+			LANGSMITH_PROJECT: this.env.LANGSMITH_PROJECT
 		});
 
 		// smart_crawl_url tool
@@ -51,7 +55,11 @@ export class Context4AllMCP extends PaidMcpAgent<Env, State, AgentProps> {
 			LLM_API_URL: this.env.LLM_API_URL,
 			MODEL_CHOICE: this.env.MODEL_CHOICE,
 			MODEL_EMBEDDING: this.env.MODEL_EMBEDDING,
-			USE_CONTEXTUAL_EMBEDDINGS: this.env.USE_CONTEXTUAL_EMBEDDINGS
+			USE_CONTEXTUAL_EMBEDDINGS: this.env.USE_CONTEXTUAL_EMBEDDINGS,
+
+			LANGSMITH_API_KEY: this.env.LANGSMITH_API_KEY,
+			LANGSMITH_ENDPOINT: this.env.LANGSMITH_ENDPOINT,
+			LANGSMITH_PROJECT: this.env.LANGSMITH_PROJECT
 		});
 
 		// get_available_sources tool
@@ -69,7 +77,11 @@ export class Context4AllMCP extends PaidMcpAgent<Env, State, AgentProps> {
 			MODEL_EMBEDDING: this.env.MODEL_EMBEDDING,
 			USE_HYBRID_SEARCH: this.env.USE_HYBRID_SEARCH,
 			USE_RERANKING: this.env.USE_RERANKING,
-			COHERE_API_KEY: this.env.COHERE_API_KEY
+			COHERE_API_KEY: this.env.COHERE_API_KEY,
+			
+			LANGSMITH_API_KEY: this.env.LANGSMITH_API_KEY,
+			LANGSMITH_ENDPOINT: this.env.LANGSMITH_ENDPOINT,
+			LANGSMITH_PROJECT: this.env.LANGSMITH_PROJECT
 		});
 
 		// search_code_examples tool
@@ -79,12 +91,14 @@ export class Context4AllMCP extends PaidMcpAgent<Env, State, AgentProps> {
 			LLM_API_KEY: this.env.LLM_API_KEY,
 			LLM_API_URL: this.env.LLM_API_URL,
 			MODEL_EMBEDDING: this.env.MODEL_EMBEDDING,
-
 			USE_HYBRID_SEARCH: this.env.USE_HYBRID_SEARCH,
 			USE_RERANKING: this.env.USE_RERANKING,
 			USE_AGENTIC_RAG: this.env.USE_AGENTIC_RAG,
-
-			COHERE_API_KEY: this.env.COHERE_API_KEY
+			COHERE_API_KEY: this.env.COHERE_API_KEY,
+			
+			LANGSMITH_API_KEY: this.env.LANGSMITH_API_KEY,
+			LANGSMITH_ENDPOINT: this.env.LANGSMITH_ENDPOINT,
+			LANGSMITH_PROJECT: this.env.LANGSMITH_PROJECT
 		});
 	}
 }

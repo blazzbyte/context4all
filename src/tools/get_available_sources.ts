@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { experimental_PaidMcpAgent as PaidMcpAgent } from "@stripe/agent-toolkit/cloudflare";
 import { getSupabaseClient } from "../utils/supabase";
 

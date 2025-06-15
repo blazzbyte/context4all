@@ -38,6 +38,10 @@ declare namespace Cloudflare {
 		LLM_API_URL: string;
 		MODEL_CHOICE: string;
 		MODEL_EMBEDDING: string;
+
+        LANGSMITH_ENDPOINT: string;
+        LANGSMITH_API_KEY: string;
+        LANGSMITH_PROJECT: string;
 	}
 }
 interface Env extends Cloudflare.Env {}

@@ -7,6 +7,8 @@ import { addDocumentsToSupabase, addCodeExamplesToSupabase } from '../utils/docu
 import { smartChunkMarkdown, extractSectionInfo } from '../utils/content_processor';
 import { extractCodeBlocks, processCodeExample } from "../utils/code";
 import OpenAI from "openai";
+import { wrapOpenAI } from "langsmith/wrappers";
+import { Client } from "langsmith";
 
 // Define LinkInfo interface to match the one in crawler.ts
 interface LinkInfo {
@@ -29,6 +31,9 @@ export function crawlSinglePageTool(
     MODEL_CHOICE?: string;
     MODEL_EMBEDDING?: string;
     USE_CONTEXTUAL_EMBEDDINGS?: string;
+    LANGSMITH_API_KEY?: string;
+    LANGSMITH_ENDPOINT?: string;
+    LANGSMITH_PROJECT?: string;
   }
 ) {
   const server = agent.server;
@@ -78,10 +83,21 @@ export function crawlSinglePageTool(
         // Get Supabase client
         const supabaseClient = getSupabaseClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
 
+        const langsmithClient = new Client({
+          apiKey: env.LANGSMITH_API_KEY || "",
+          apiUrl: env.LANGSMITH_ENDPOINT || "https://api.smith.langchain.com",
+        });
+
         // Create OpenAI client if LLM API key is provided
-        const openaiClient = new OpenAI({
+        const openaiClient = wrapOpenAI(new OpenAI({
           apiKey: env.LLM_API_KEY,
           ...(env.LLM_API_URL && { baseURL: env.LLM_API_URL })
+        }), {
+          name: "crawl_single_page",
+          run_type: "llm",
+          client: langsmithClient,
+          tracingEnabled: true,
+          project_name: env.LANGSMITH_PROJECT || "Testing"
         });
 
         // Get model choices

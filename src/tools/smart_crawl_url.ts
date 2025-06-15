@@ -8,6 +8,8 @@ import { smartChunkMarkdown, extractSectionInfo } from '../utils/content_process
 import { extractCodeBlocks, processCodeExample } from "../utils/code";
 import { isSitemap, isTextFile, parseSitemap, crawlTextFile } from "../utils/url";
 import OpenAI from "openai";
+import { wrapOpenAI } from "langsmith/wrappers";
+import { Client } from "langsmith";
 
 export function smartCrawlUrlTool(
   agent: PaidMcpAgent<Env, any, any>,
@@ -23,6 +25,9 @@ export function smartCrawlUrlTool(
     MODEL_CHOICE?: string;
     MODEL_EMBEDDING?: string;
     USE_CONTEXTUAL_EMBEDDINGS?: string;
+    LANGSMITH_API_KEY?: string;
+    LANGSMITH_ENDPOINT?: string;
+    LANGSMITH_PROJECT?: string;
   }
 ) {
   const server = agent.server;
@@ -65,10 +70,21 @@ All crawled content is chunked and stored in Supabase for later retrieval and qu
         // Get Supabase client
         const supabaseClient = getSupabaseClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
 
+        const langsmithClient = new Client({
+          apiKey: env.LANGSMITH_API_KEY || "",
+          apiUrl: env.LANGSMITH_ENDPOINT || "https://api.smith.langchain.com",
+        });
+
         // Create OpenAI client if LLM API key is provided
-        const openaiClient = new OpenAI({
+        const openaiClient = wrapOpenAI(new OpenAI({
           apiKey: env.LLM_API_KEY,
           ...(env.LLM_API_URL && { baseURL: env.LLM_API_URL })
+        }), {
+          name: "smart_crawl_url",
+          run_type: "llm",
+          client: langsmithClient,
+          tracingEnabled: true,
+          project_name: env.LANGSMITH_PROJECT || "Testing"
         });
 
         // Get model choices

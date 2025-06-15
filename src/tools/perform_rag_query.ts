@@ -3,7 +3,10 @@ import { experimental_PaidMcpAgent as PaidMcpAgent } from "@stripe/agent-toolkit
 import { getSupabaseClient } from "../utils/supabase";
 import { searchDocuments } from "../utils/documents";
 import { rerankAndMergeResults } from "../utils/reranker";
+import { logRetrieverResults } from "../utils/langsmith";
 import OpenAI from "openai";
+import { Client } from "langsmith";
+import { wrapOpenAI } from "langsmith/wrappers";
 
 export function performRagQueryTool(
     agent: PaidMcpAgent<Env, any, any>,
@@ -16,6 +19,9 @@ export function performRagQueryTool(
         USE_HYBRID_SEARCH?: string;
         USE_RERANKING?: string;
         COHERE_API_KEY?: string;
+        LANGSMITH_API_KEY?: string;
+        LANGSMITH_ENDPOINT?: string;
+        LANGSMITH_PROJECT?: string;
     }
 ) {
     const server = agent.server;
@@ -43,13 +49,25 @@ Get the source by using the get_available_sources tool before calling this searc
             match_count?: number;
         }) => {
             try {
+                // Initialize LangSmith client for tracing if API key is provided
+                const langsmithClient = new Client({
+                    apiKey: env.LANGSMITH_API_KEY || "",
+                    apiUrl: env.LANGSMITH_ENDPOINT || "https://api.smith.langchain.com",
+                });
+
                 // Get Supabase client
                 const supabaseClient = getSupabaseClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
 
                 // Create OpenAI client if LLM API key is provided
-                const openaiClient = new OpenAI({
+                const openaiClient = wrapOpenAI(new OpenAI({
                     apiKey: env.LLM_API_KEY,
                     ...(env.LLM_API_URL && { baseURL: env.LLM_API_URL })
+                }), {
+                    name: "perform_rag_query",
+                    run_type: "llm",
+                    client: langsmithClient,
+                    tracingEnabled: true,
+                    project_name: env.LANGSMITH_PROJECT || "Testing"
                 });
 
                 // Get model choices
@@ -63,7 +81,7 @@ Get the source by using the get_available_sources tool before calling this searc
                 if (source && source.trim()) {
                     filterMetadata = { source: source };
                 }
-                
+
                 // Get user ID from agent props and add to filter
                 const userId = agent.props?.userId;
 
@@ -93,7 +111,7 @@ Get the source by using the get_available_sources tool before calling this searc
                     if (source && source.trim()) {
                         keywordQuery = keywordQuery.eq('source_id', source);
                     }
-                    
+
                     // Apply user_id filter if available
                     if (userId) {
                         keywordQuery = keywordQuery.eq('user_id', userId);
@@ -172,6 +190,16 @@ Get the source by using the get_available_sources tool before calling this searc
                         userId
                     );
                 }
+
+                // Create metadata for LangSmith
+                const metadata = {
+                    search_mode: useHybridSearch ? "hybrid" : "vector",
+                    model_embedding: modelEmbedding,
+                    user_id: userId || "anonymous"
+                };
+
+                // Log the retrieval operation to LangSmith
+                await logRetrieverResults(query, results, metadata, langsmithClient, env.LANGSMITH_PROJECT);
 
                 // Apply reranking if enabled
                 const useReranking = env.USE_RERANKING === "true" && env.COHERE_API_KEY;

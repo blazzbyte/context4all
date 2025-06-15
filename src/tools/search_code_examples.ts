@@ -3,7 +3,10 @@ import { experimental_PaidMcpAgent as PaidMcpAgent } from "@stripe/agent-toolkit
 import { getSupabaseClient } from "../utils/supabase";
 import { searchCodeExamples } from "../utils/documents";
 import { rerankAndMergeResults } from "../utils/reranker";
+import { logCodeExampleRetrieverResults } from "../utils/langsmith";
 import OpenAI from "openai";
+import { Client } from "langsmith";
+import { wrapOpenAI } from "langsmith/wrappers";
 
 export function searchCodeExamplesTool(
   agent: PaidMcpAgent<Env, any, any>,
@@ -17,6 +20,9 @@ export function searchCodeExamplesTool(
     USE_RERANKING?: string;
     USE_AGENTIC_RAG?: string;
     COHERE_API_KEY?: string;
+    LANGSMITH_API_KEY?: string;
+    LANGSMITH_ENDPOINT?: string;
+    LANGSMITH_PROJECT?: string;
   }
 ) {
   const server = agent.server;
@@ -60,13 +66,25 @@ Use the get_available_sources tool first to see what sources are available for f
       }
 
       try {
+        // Initialize LangSmith client for tracing if API key is provided
+        const langsmithClient = new Client({
+          apiKey: env.LANGSMITH_API_KEY || "",
+          apiUrl: env.LANGSMITH_ENDPOINT || "https://api.smith.langchain.com",
+        });
+
         // Get Supabase client
         const supabaseClient = getSupabaseClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
 
         // Create OpenAI client if LLM API key is provided
-        const openaiClient = new OpenAI({
+        const openaiClient = wrapOpenAI(new OpenAI({
           apiKey: env.LLM_API_KEY,
           ...(env.LLM_API_URL && { baseURL: env.LLM_API_URL })
+        }), {
+          name: "search_code_examples",
+          run_type: "retriever",
+          client: langsmithClient,
+          tracingEnabled: true,
+          project_name: env.LANGSMITH_PROJECT || "Testing"
         });
 
         // Get model choices
@@ -192,6 +210,16 @@ Use the get_available_sources tool first to see what sources are available for f
             userId
           );
         }
+
+        // Create metadata for LangSmith
+        const metadata = {
+          search_mode: useHybridSearch ? "hybrid" : "vector",
+          model_embedding: modelEmbedding,
+          user_id: userId || "anonymous"
+        };
+
+        // Log the code example retrieval operation to LangSmith
+        await logCodeExampleRetrieverResults(query, results, metadata, langsmithClient, env.LANGSMITH_PROJECT);
 
         // Apply reranking if enabled
         const useReranking = env.USE_RERANKING === "true" && env.COHERE_API_KEY;
