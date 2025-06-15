@@ -3,9 +3,9 @@ import { experimental_PaidMcpAgent as PaidMcpAgent } from "@stripe/agent-toolkit
 import { WebCrawler } from "../utils/crawler";
 import { getSupabaseClient } from "../utils/supabase";
 import { extractSourceMetadata, updateSourceInfo, extractSourceSummary } from '../utils/metadata';
-import { addDocumentsToSupabase } from '../utils/documents';
+import { addDocumentsToSupabase, addCodeExamplesToSupabase } from '../utils/documents';
 import { smartChunkMarkdown, extractSectionInfo } from '../utils/content_processor';
-import { extractCodeBlocks, addCodeExamplesToSupabase, processCodeExample } from "../utils/code";
+import { extractCodeBlocks, processCodeExample } from "../utils/code";
 import { isSitemap, isTextFile, parseSitemap, crawlTextFile } from "../utils/url";
 import OpenAI from "openai";
 
@@ -219,6 +219,7 @@ All crawled content is chunked and stored in Supabase for later retrieval and qu
 
         // Extract and process code examples from all documents only if enabled
         const extractCodeExamplesEnabled = env.USE_AGENTIC_RAG === "true";
+        console.log(extractCodeExamplesEnabled);
         let allCodeBlocks: ReturnType<typeof extractCodeBlocks> = [];
         
         if (extractCodeExamplesEnabled && openaiClient) {
@@ -233,7 +234,6 @@ All crawled content is chunked and stored in Supabase for later retrieval and qu
             const sourceUrl = doc.url;
             const md = doc.markdown;
             const codeBlocks = extractCodeBlocks(md);
-
             if (codeBlocks && codeBlocks.length > 0) {
               // Process code examples in parallel
               const summaryPromises = codeBlocks.map(block =>

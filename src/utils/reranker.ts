@@ -3,34 +3,6 @@
  */
 import { CohereClient } from 'cohere-ai';
 
-// Variable to hold the Cohere client instance
-let cohereClient: CohereClient | null = null;
-
-/**
- * Initialize the Cohere client with an API key
- * 
- * @param apiKey Cohere API key
- * @returns The initialized Cohere client
- */
-export function initCohere(apiKey: string): CohereClient {
-  cohereClient = new CohereClient({
-    token: apiKey,
-  });
-  return cohereClient;
-}
-
-/**
- * Get the current Cohere client instance, or throw an error if not initialized
- * 
- * @returns The Cohere client instance
- */
-export function getCohereClient(): CohereClient {
-  if (!cohereClient) {
-    throw new Error('Cohere client not initialized. Call initCohere first.');
-  }
-  return cohereClient;
-}
-
 /**
  * Interface for search result objects
  */
@@ -47,6 +19,7 @@ export interface SearchResult {
  * @param contentKey The key in each result object that contains the text content
  * @param modelName The Cohere rerank model to use
  * @param topN Optional number of top results to return (default: all results)
+ * @param cohereApiKey Cohere API key
  * @returns Reranked list of results
  */
 export async function rerankResults(
@@ -54,14 +27,22 @@ export async function rerankResults(
   results: SearchResult[],
   contentKey: string = "content",
   modelName: string = "rerank-multilingual-v3.0",
-  topN?: number
+  topN?: number,
+  cohereApiKey?: string
 ): Promise<SearchResult[]> {
   if (!results || results.length === 0) {
     return results;
   }
   
+  if (!cohereApiKey) {
+    console.error('Cohere API key not provided for reranking');
+    return results;
+  }
+  
   try {
-    const client = getCohereClient();
+    const client = new CohereClient({
+      token: cohereApiKey,
+    });
     
     // Extract content from results
     const documents = results.map(result => result[contentKey] || "");
@@ -106,20 +87,29 @@ export async function rerankResults(
  * @param results List of search results
  * @param contentKey The key in each result object that contains the text content
  * @param modelName The Cohere rerank model to use
+ * @param cohereApiKey Cohere API key
  * @returns Reranked list of results
  */
 export async function rerankAndMergeResults(
   query: string,
   results: SearchResult[],
   contentKey: string = "content",
-  modelName: string = "rerank-multilingual-v3.0"
+  modelName: string = "rerank-multilingual-v3.0",
+  cohereApiKey?: string
 ): Promise<SearchResult[]> {
   if (!results || results.length === 0) {
     return results;
   }
   
+  if (!cohereApiKey) {
+    console.error('Cohere API key not provided for reranking');
+    return results;
+  }
+  
   try {
-    const client = getCohereClient();
+    const client = new CohereClient({
+      token: cohereApiKey,
+    });
     
     // Extract content from results
     const documents = results.map(result => result[contentKey] || "");

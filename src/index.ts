@@ -24,16 +24,6 @@ export class Context4AllMCP extends PaidMcpAgent<Env, State, AgentProps> {
 	});
 
 	async init() {
-		// Example free tools (that don't require payment but do require a logged in user)
-		tools.addTool(this);
-		tools.calculateTool(this);
-
-		// Example of a paid tool that requires a logged in user and a one-time payment
-		tools.onetimeAddTool(this, {
-			STRIPE_ONE_TIME_PRICE_ID: this.env.STRIPE_ONE_TIME_PRICE_ID,
-			BASE_URL: this.env.BASE_URL
-		});
-		
 		// Add the crawl_single_page tool with all required API keys
 		tools.crawlSinglePageTool(this, {
 			SUPABASE_URL: this.env.SUPABASE_URL,
@@ -62,6 +52,39 @@ export class Context4AllMCP extends PaidMcpAgent<Env, State, AgentProps> {
 			MODEL_CHOICE: this.env.MODEL_CHOICE,
 			MODEL_EMBEDDING: this.env.MODEL_EMBEDDING,
 			USE_CONTEXTUAL_EMBEDDINGS: this.env.USE_CONTEXTUAL_EMBEDDINGS
+		});
+
+		// Add the get_available_sources tool
+		tools.getAvailableSourcesTool(this, {
+			SUPABASE_URL: this.env.SUPABASE_URL,
+			SUPABASE_SERVICE_KEY: this.env.SUPABASE_SERVICE_KEY
+		});
+
+		// Add the perform_rag_query tool
+		tools.performRagQueryTool(this, {
+			SUPABASE_URL: this.env.SUPABASE_URL,
+			SUPABASE_SERVICE_KEY: this.env.SUPABASE_SERVICE_KEY,
+			LLM_API_KEY: this.env.LLM_API_KEY,
+			LLM_API_URL: this.env.LLM_API_URL,
+			MODEL_EMBEDDING: this.env.MODEL_EMBEDDING,
+			USE_HYBRID_SEARCH: this.env.USE_HYBRID_SEARCH,
+			USE_RERANKING: this.env.USE_RERANKING,
+			COHERE_API_KEY: this.env.COHERE_API_KEY
+		});
+
+		// Add the search_code_examples tool
+		tools.searchCodeExamplesTool(this, {
+			SUPABASE_URL: this.env.SUPABASE_URL,
+			SUPABASE_SERVICE_KEY: this.env.SUPABASE_SERVICE_KEY,
+			LLM_API_KEY: this.env.LLM_API_KEY,
+			LLM_API_URL: this.env.LLM_API_URL,
+			MODEL_EMBEDDING: this.env.MODEL_EMBEDDING,
+
+			USE_HYBRID_SEARCH: this.env.USE_HYBRID_SEARCH,
+			USE_RERANKING: this.env.USE_RERANKING,
+			USE_AGENTIC_RAG: this.env.USE_AGENTIC_RAG,
+
+			COHERE_API_KEY: this.env.COHERE_API_KEY
 		});
 	}
 }

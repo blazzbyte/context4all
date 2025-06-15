@@ -31,6 +31,8 @@ declare namespace Cloudflare {
 
 		USE_AGENTIC_RAG: string;
 		USE_CONTEXTUAL_EMBEDDINGS: string;
+		USE_HYBRID_SEARCH: string;
+		USE_RERANKING: string;
 
 		LLM_API_KEY: string;
 		LLM_API_URL: string;
