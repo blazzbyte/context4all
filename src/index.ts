@@ -59,7 +59,10 @@ export class Context4AllMCP extends PaidMcpAgent<Env, State, AgentProps> {
 
 			LANGSMITH_API_KEY: this.env.LANGSMITH_API_KEY,
 			LANGSMITH_ENDPOINT: this.env.LANGSMITH_ENDPOINT,
-			LANGSMITH_PROJECT: this.env.LANGSMITH_PROJECT
+			LANGSMITH_PROJECT: this.env.LANGSMITH_PROJECT,
+
+			STRIPE_SUBSCRIPTION_PRICE_ID: this.env.STRIPE_SUBSCRIPTION_PRICE_ID,
+			BASE_URL: this.env.BASE_URL
 		});
 
 		// get_available_sources tool
@@ -81,7 +84,8 @@ export class Context4AllMCP extends PaidMcpAgent<Env, State, AgentProps> {
 			
 			LANGSMITH_API_KEY: this.env.LANGSMITH_API_KEY,
 			LANGSMITH_ENDPOINT: this.env.LANGSMITH_ENDPOINT,
-			LANGSMITH_PROJECT: this.env.LANGSMITH_PROJECT
+			LANGSMITH_PROJECT: this.env.LANGSMITH_PROJECT,
+			
 		});
 
 		// search_code_examples tool

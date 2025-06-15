@@ -10,6 +10,7 @@ import { isSitemap, isTextFile, parseSitemap, crawlTextFile } from "../utils/url
 import OpenAI from "openai";
 import { wrapOpenAI } from "langsmith/wrappers";
 import { Client } from "langsmith";
+import { REUSABLE_PAYMENT_REASON } from "../helpers/constants";
 
 export function smartCrawlUrlTool(
   agent: PaidMcpAgent<Env, any, any>,
@@ -28,16 +29,22 @@ export function smartCrawlUrlTool(
     LANGSMITH_API_KEY?: string;
     LANGSMITH_ENDPOINT?: string;
     LANGSMITH_PROJECT?: string;
+    STRIPE_SUBSCRIPTION_PRICE_ID?: string;
+    BASE_URL?: string;
   }
 ) {
-  const server = agent.server;
-
   if (!env?.SUPABASE_URL || !env?.SUPABASE_SERVICE_KEY || !env?.BROWSERLESS_TOKEN || !env?.COHERE_API_KEY) {
     throw new Error("Missing required environment variables");
   }
 
-  // @ts-ignore
-  server.tool(
+  const priceId = env?.STRIPE_SUBSCRIPTION_PRICE_ID || null;
+  const baseUrl = env?.BASE_URL || null;
+
+  if (!priceId || !baseUrl) {
+    throw new Error("STRIPE_SUBSCRIPTION_PRICE_ID and BASE_URL are required for paid tools");
+  }
+
+  agent.paidTool(
     "smart_crawl_url",
     `Intelligently crawl a URL based on its type and store content in Supabase.
 
@@ -353,6 +360,19 @@ All crawled content is chunked and stored in Supabase for later retrieval and qu
           }]
         };
       }
+    },
+    {
+      checkout: {
+        success_url: `${baseUrl}/payment/success`,
+        line_items: [
+          {
+            price: priceId,
+            quantity: 1,
+          },
+        ],
+        mode: 'subscription',
+      },
+      paymentReason: REUSABLE_PAYMENT_REASON,
     }
   );
 }
