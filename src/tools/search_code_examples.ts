@@ -83,10 +83,6 @@ Use the get_available_sources tool first to see what sources are available for f
         
         // Get user ID from agent props and add to filter
         const userId = agent.props?.userId;
-        if (userId) {
-          filterMetadata = filterMetadata || {};
-          filterMetadata.user_id = userId;
-        }
 
         let results: any[] = [];
 
@@ -102,7 +98,7 @@ Use the get_available_sources tool first to see what sources are available for f
             match_count * 2, // Get double to have room for filtering
             filterMetadata,
             source_id,
-            userId  // Pass userId to searchCodeExamples
+            userId
           );
 
           // 2. Get keyword search results using ILIKE on both content and summary
@@ -193,7 +189,7 @@ Use the get_available_sources tool first to see what sources are available for f
             match_count,
             filterMetadata,
             source_id,
-            userId  // Pass userId to searchCodeExamples
+            userId
           );
         }
 

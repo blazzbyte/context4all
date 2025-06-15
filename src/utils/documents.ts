@@ -192,6 +192,7 @@ export async function addDocumentsToSupabase(
  * @param modelEmbedding Model to use for embeddings
  * @param matchCount Maximum number of results to return
  * @param filterMetadata Optional metadata filter
+ * @param userId Optional user ID to filter results
  * @returns List of matching documents
  */
 export async function searchDocuments(
@@ -200,7 +201,8 @@ export async function searchDocuments(
   openaiClient: OpenAI,
   modelEmbedding?: string,
   matchCount: number = 10,
-  filterMetadata?: Record<string, any>
+  filterMetadata?: Record<string, any>,
+  userId?: string
 ): Promise<any[]> {
   // Create embedding for the query
   const queryEmbedding = await createEmbedding(query, openaiClient, modelEmbedding);
@@ -216,6 +218,16 @@ export async function searchDocuments(
     // Only add the filter if it's actually provided and not empty
     if (filterMetadata) {
       params.filter = filterMetadata;
+    }
+
+    // Extract source_filter from filterMetadata if it exists
+    if (filterMetadata?.source) {
+      params.source_filter = filterMetadata.source;
+    }
+
+    // Add user filter if provided
+    if (userId) {
+      params.user_filter = userId;
     }
 
     const result = await client.rpc('match_crawled_pages', params);

@@ -66,10 +66,6 @@ Get the source by using the get_available_sources tool before calling this searc
                 
                 // Get user ID from agent props and add to filter
                 const userId = agent.props?.userId;
-                if (userId) {
-                    filterMetadata = filterMetadata || {};
-                    filterMetadata.user_id = userId;
-                }
 
                 let results: any[] = [];
 
@@ -83,7 +79,8 @@ Get the source by using the get_available_sources tool before calling this searc
                         openaiClient,
                         modelEmbedding,
                         match_count * 2, // Get double to have room for filtering
-                        filterMetadata
+                        filterMetadata,
+                        userId
                     );
 
                     // 2. Get keyword search results using ILIKE
@@ -171,7 +168,8 @@ Get the source by using the get_available_sources tool before calling this searc
                         openaiClient,
                         modelEmbedding,
                         match_count,
-                        filterMetadata
+                        filterMetadata,
+                        userId
                     );
                 }
 
