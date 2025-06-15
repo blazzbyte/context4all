@@ -24,7 +24,7 @@ export class Context4AllMCP extends PaidMcpAgent<Env, State, AgentProps> {
 	});
 
 	async init() {
-		// Add the crawl_single_page tool with all required API keys
+		// crawl_single_page tool
 		tools.crawlSinglePageTool(this, {
 			SUPABASE_URL: this.env.SUPABASE_URL,
 			SUPABASE_SERVICE_KEY: this.env.SUPABASE_SERVICE_KEY,
@@ -39,7 +39,7 @@ export class Context4AllMCP extends PaidMcpAgent<Env, State, AgentProps> {
 			USE_CONTEXTUAL_EMBEDDINGS: this.env.USE_CONTEXTUAL_EMBEDDINGS
 		});
 
-		// Add the smart_crawl_url tool with all required API keys
+		// smart_crawl_url tool
 		tools.smartCrawlUrlTool(this, {
 			SUPABASE_URL: this.env.SUPABASE_URL,
 			SUPABASE_SERVICE_KEY: this.env.SUPABASE_SERVICE_KEY,
@@ -54,13 +54,13 @@ export class Context4AllMCP extends PaidMcpAgent<Env, State, AgentProps> {
 			USE_CONTEXTUAL_EMBEDDINGS: this.env.USE_CONTEXTUAL_EMBEDDINGS
 		});
 
-		// Add the get_available_sources tool
+		// get_available_sources tool
 		tools.getAvailableSourcesTool(this, {
 			SUPABASE_URL: this.env.SUPABASE_URL,
 			SUPABASE_SERVICE_KEY: this.env.SUPABASE_SERVICE_KEY
 		});
 
-		// Add the perform_rag_query tool
+		// perform_rag_query tool
 		tools.performRagQueryTool(this, {
 			SUPABASE_URL: this.env.SUPABASE_URL,
 			SUPABASE_SERVICE_KEY: this.env.SUPABASE_SERVICE_KEY,
@@ -72,7 +72,7 @@ export class Context4AllMCP extends PaidMcpAgent<Env, State, AgentProps> {
 			COHERE_API_KEY: this.env.COHERE_API_KEY
 		});
 
-		// Add the search_code_examples tool
+		// search_code_examples tool
 		tools.searchCodeExamplesTool(this, {
 			SUPABASE_URL: this.env.SUPABASE_URL,
 			SUPABASE_SERVICE_KEY: this.env.SUPABASE_SERVICE_KEY,

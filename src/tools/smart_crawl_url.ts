@@ -178,6 +178,10 @@ All crawled content is chunked and stored in Supabase for later retrieval and qu
 
         // Update source information for each unique source FIRST (before inserting documents)
         const sourceIds = Object.keys(sourceContentMap);
+        
+        // Get user ID from agent props
+        const userId = agent.props?.userId;
+        
         for (const sourceId of sourceIds) {
           const content = sourceContentMap[sourceId];
           let summary = "";
@@ -198,7 +202,7 @@ All crawled content is chunked and stored in Supabase for later retrieval and qu
           }
 
           const wordCount = sourceWordCounts[sourceId] || 0;
-          await updateSourceInfo(supabaseClient, sourceId, summary, wordCount);
+          await updateSourceInfo(supabaseClient, sourceId, summary, wordCount, userId);
         }
 
         // Add documentation chunks to Supabase (AFTER sources exist)
@@ -214,6 +218,7 @@ All crawled content is chunked and stored in Supabase for later retrieval and qu
           modelEmbedding,
           env.USE_CONTEXTUAL_EMBEDDINGS === "true",
           modelChoice,
+          userId,
           batchSize
         );
 
@@ -294,6 +299,7 @@ All crawled content is chunked and stored in Supabase for later retrieval and qu
               codeMetadatas,
               openaiClient,
               modelEmbedding,
+              userId,
               batchSize
             );
           }

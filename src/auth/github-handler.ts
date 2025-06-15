@@ -100,6 +100,7 @@ app.get("/callback/github", async (c) => {
 			email,
 			accessToken,
 			userEmail: email,
+			userId: login,
 		} as Props,
 	});
 

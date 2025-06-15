@@ -63,6 +63,13 @@ Get the source by using the get_available_sources tool before calling this searc
                 if (source && source.trim()) {
                     filterMetadata = { source: source };
                 }
+                
+                // Get user ID from agent props and add to filter
+                const userId = agent.props?.userId;
+                if (userId) {
+                    filterMetadata = filterMetadata || {};
+                    filterMetadata.user_id = userId;
+                }
 
                 let results: any[] = [];
 
@@ -88,6 +95,11 @@ Get the source by using the get_available_sources tool before calling this searc
                     // Apply source filter if provided
                     if (source && source.trim()) {
                         keywordQuery = keywordQuery.eq('source_id', source);
+                    }
+                    
+                    // Apply user_id filter if available
+                    if (userId) {
+                        keywordQuery = keywordQuery.eq('user_id', userId);
                     }
 
                     // Execute keyword search

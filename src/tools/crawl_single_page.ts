@@ -166,7 +166,10 @@ export function crawlSinglePageTool(
             summary = sentences.slice(0, 3).join(' ').trim() || `Source: ${sourceId}`;
           }
 
-          await updateSourceInfo(supabaseClient, sourceId, summary, totalWordCount);
+          // Get user ID from agent props
+          const userId = agent.props?.userId;
+
+          await updateSourceInfo(supabaseClient, sourceId, summary, totalWordCount, userId);
 
           // Add documents to Supabase AFTER source exists
           await addDocumentsToSupabase(
@@ -179,7 +182,8 @@ export function crawlSinglePageTool(
             openaiClient,
             modelEmbedding,
             env.USE_CONTEXTUAL_EMBEDDINGS === "true",
-            modelChoice
+            modelChoice,
+            userId
           );
 
           // Extract and process code examples if USE_AGENTIC_RAG is enabled
@@ -244,7 +248,8 @@ export function crawlSinglePageTool(
                 codeSummaries,
                 codeMetadatas,
                 openaiClient,
-                modelEmbedding
+                modelEmbedding,
+                userId
               );
             }
           }

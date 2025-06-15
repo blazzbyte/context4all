@@ -113,5 +113,5 @@ export type Props = {
 	email: string
 	userEmail: string
 	accessToken: string
+	userId: string
 }
-

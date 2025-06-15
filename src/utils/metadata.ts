@@ -52,35 +52,60 @@ export function extractSourceMetadata(source: {
  * @param sourceId The source ID (domain)
  * @param summary Summary of the source
  * @param wordCount Total word count for the source
+ * @param userId Optional user ID to associate with the source
  */
 export async function updateSourceInfo(
   client: SupabaseClient,
   sourceId: string,
   summary: string,
-  wordCount: number
+  wordCount: number,
+  userId?: string
 ): Promise<void> {
   try {
+    // Prepare update data
+    const updateData: Record<string, any> = {
+      summary: summary,
+      total_word_count: wordCount,
+      updated_at: new Date().toISOString()
+    };
+    
+    // Add user_id to update data if provided
+    if (userId) {
+      updateData.user_id = userId;
+    }
+    
     // Try to update existing source
-    const result = await client
+    let query = client
       .from('sources')
-      .update({
-        summary: summary,
-        total_word_count: wordCount,
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('source_id', sourceId);
+    
+    // If userId is provided, only update sources for this user
+    if (userId) {
+      query = query.eq('user_id', userId);
+    }
+    
+    const result = await query;
     
     // If no rows were affected, insert new source
     const rowsAffected = result.count || 0;
     
     if (rowsAffected === 0) {
+      // Prepare insert data
+      const insertData: Record<string, any> = {
+        source_id: sourceId,
+        summary: summary,
+        total_word_count: wordCount
+      };
+      
+      // Add user_id to insert data if provided
+      if (userId) {
+        insertData.user_id = userId;
+      }
+      
       await client
         .from('sources')
-        .insert({
-          source_id: sourceId,
-          summary: summary,
-          total_word_count: wordCount
-        });
+        .insert(insertData);
       console.log(`Created new source: ${sourceId}`);
     } else {
       console.log(`Updated source: ${sourceId}`);

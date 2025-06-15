@@ -16,6 +16,7 @@ import OpenAI from 'openai';
  * @param modelEmbedding Model to use for embeddings
  * @param useContextualEmbeddings Whether to use contextual embeddings
  * @param modelChoice Model to use for contextual generation
+ * @param userId User ID to associate with the documents
  * @param batchSize Size of each batch for insertion
  */
 export async function addDocumentsToSupabase(
@@ -29,6 +30,7 @@ export async function addDocumentsToSupabase(
   modelEmbedding?: string,
   useContextualEmbeddings: boolean = false,
   modelChoice?: string,
+  userId?: string,
   batchSize: number = 20
 ): Promise<void> {
   // Get unique URLs to delete existing records
@@ -37,14 +39,28 @@ export async function addDocumentsToSupabase(
   // Delete existing records for these URLs in a single operation
   try {
     if (uniqueUrls.length > 0) {
-      await client.from("crawled_pages").delete().in("url", uniqueUrls);
+      let deleteQuery = client.from("crawled_pages").delete().in("url", uniqueUrls);
+      
+      // Only delete documents for this user if userId is provided
+      if (userId) {
+        deleteQuery = deleteQuery.eq("user_id", userId);
+      }
+      
+      await deleteQuery;
     }
   } catch (e) {
     console.log(`Batch delete failed: ${e}. Trying one-by-one deletion as fallback.`);
     // Fallback: delete records one by one
     for (const url of uniqueUrls) {
       try {
-        await client.from("crawled_pages").delete().eq("url", url);
+        let deleteQuery = client.from("crawled_pages").delete().eq("url", url);
+        
+        // Only delete documents for this user if userId is provided
+        if (userId) {
+          deleteQuery = deleteQuery.eq("user_id", userId);
+        }
+        
+        await deleteQuery;
       } catch (innerE) {
         console.log(`Error deleting record for URL ${url}: ${innerE}`);
         // Continue with the next URL even if one fails
@@ -121,7 +137,8 @@ export async function addDocumentsToSupabase(
           ...batchMetadatas[j]
         },
         source_id: sourceId,
-        embedding: batchEmbeddings[j]
+        embedding: batchEmbeddings[j],
+        user_id: userId // Add user_id to the data
       };
 
       batchData.push(data);
@@ -221,6 +238,7 @@ export async function searchDocuments(
 * @param metadatas List of metadata dictionaries
 * @param openaiClient OpenAI client instance
 * @param modelEmbedding Model to use for embeddings
+* @param userId User ID to associate with the code examples
 * @param batchSize Size of each batch for insertion
 */
 export async function addCodeExamplesToSupabase(
@@ -232,6 +250,7 @@ export async function addCodeExamplesToSupabase(
   metadatas: Record<string, any>[],
   openaiClient: OpenAI,
   modelEmbedding?: string,
+  userId?: string,
   batchSize: number = 20
 ): Promise<void> {
   if (!urls || urls.length === 0) {
@@ -242,7 +261,14 @@ export async function addCodeExamplesToSupabase(
   const uniqueUrls = [...new Set(urls)];
   for (const url of uniqueUrls) {
     try {
-      await client.from('code_examples').delete().eq('url', url);
+      let deleteQuery = client.from('code_examples').delete().eq('url', url);
+      
+      // Only delete code examples for this user if userId is provided
+      if (userId) {
+        deleteQuery = deleteQuery.eq("user_id", userId);
+      }
+      
+      await deleteQuery;
     } catch (e) {
       console.log(`Error deleting existing code examples for ${url}: ${e}`);
     }
@@ -294,7 +320,8 @@ export async function addCodeExamplesToSupabase(
         summary: summaries[idx],
         metadata: metadatas[idx],
         source_id: sourceId,
-        embedding: validEmbeddings[j]
+        embedding: validEmbeddings[j],
+        user_id: userId // Add user_id to the data
       });
     }
 
@@ -348,6 +375,7 @@ export async function addCodeExamplesToSupabase(
  * @param matchCount Maximum number of results to return
  * @param filterMetadata Optional metadata filter
  * @param sourceId Optional source ID to filter results
+ * @param userId Optional user ID to filter results
  * @returns List of matching code examples
  */
 export async function searchCodeExamples(
@@ -357,7 +385,8 @@ export async function searchCodeExamples(
   modelEmbedding?: string,
   matchCount: number = 10,
   filterMetadata?: Record<string, any>,
-  sourceId?: string
+  sourceId?: string,
+  userId?: string
 ): Promise<any[]> {
   // Create a more descriptive query for better embedding match
   // Since code examples are embedded with their summaries, we should make the query more descriptive
@@ -382,6 +411,11 @@ export async function searchCodeExamples(
     // Add source filter if provided
     if (sourceId) {
       params.source_filter = sourceId;
+    }
+    
+    // Add user filter if provided
+    if (userId) {
+      params.user_filter = userId;
     }
 
     const result = await client.rpc('match_code_examples', params);
